@@ -32,4 +32,4 @@ app = SentryMiddleware(app, sentry_dsn='...')
 
 The SentryMiddleware will capture and log application exceptions just fine.
 
-Explicitly logging events using the SDK from within views does not appear to work correctly yet.
+Explicitly logging events using the SDK from within views [does not currently appear to work correctly](https://github.com/getsentry/sentry-python/issues/162#issuecomment-436257011).
