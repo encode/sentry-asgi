@@ -13,23 +13,8 @@ if not os.path.isfile(SEMAPHORE):
     SEMAPHORE = None
 
 
-@pytest.fixture(autouse=True)
-def reraise_internal_exceptions(request, monkeypatch):
-    if "tests_internal_exceptions" in request.keywords:
-        return
-
-    def _capture_internal_exception(exc_info):
-        reraise(*exc_info)
-
-    monkeypatch.setattr(
-        sentry_sdk.Hub.current,
-        "_capture_internal_exception",
-        _capture_internal_exception,
-    )
-
-
 @pytest.fixture
-def monkeypatch_test_transport(monkeypatch, assert_semaphore_acceptance):
+def monkeypatch_test_transport(monkeypatch):
     def check_event(event):
         def check_string_keys(map):
             for key, value in map.items():
@@ -38,48 +23,9 @@ def monkeypatch_test_transport(monkeypatch, assert_semaphore_acceptance):
                     check_string_keys(value)
 
         check_string_keys(event)
-        assert_semaphore_acceptance(event)
 
     def inner(client):
         monkeypatch.setattr(client, "transport", TestTransport(check_event))
-
-    return inner
-
-
-def _no_errors_in_semaphore_response(obj):
-    """Assert that semaphore didn't throw any errors when processing the
-    event."""
-
-    def inner(obj):
-        if not isinstance(obj, dict):
-            return
-
-        assert "err" not in obj
-
-        for value in obj.values():
-            inner(value)
-
-    try:
-        inner(obj.get("_meta"))
-        inner(obj.get(""))
-    except AssertionError:
-        raise AssertionError(obj)
-
-
-@pytest.fixture
-def assert_semaphore_acceptance(tmpdir):
-    def inner(event):
-        if not SEMAPHORE:
-            return
-        # not dealing with the subprocess API right now
-        file = tmpdir.join("event")
-        file.write(json.dumps(dict(event)))
-        output = json.loads(
-            subprocess.check_output(
-                [SEMAPHORE, "process-event"], stdin=file.open()
-            ).decode("utf-8")
-        )
-        _no_errors_in_semaphore_response(output)
 
     return inner
 
@@ -91,25 +37,6 @@ def sentry_init(monkeypatch_test_transport):
         client = sentry_sdk.Client(*a, **kw)
         hub.bind_client(client)
         monkeypatch_test_transport(sentry_sdk.Hub.current.client)
-
-    return inner
-
-
-@pytest.fixture
-def capture_exceptions(monkeypatch):
-    def inner():
-        errors = set()
-        old_capture_event = sentry_sdk.Hub.current.capture_event
-
-        def capture_event(event, hint=None):
-            if hint:
-                if "exc_info" in hint:
-                    error = hint["exc_info"][1]
-                    errors.add(error)
-            return old_capture_event(event, hint=hint)
-
-        monkeypatch.setattr(sentry_sdk.Hub.current, "capture_event", capture_event)
-        return errors
 
     return inner
 
