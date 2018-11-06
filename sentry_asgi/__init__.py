@@ -49,6 +49,9 @@ class SentryMiddleware:
         return event
 
     def get_url(self, scope):
+        """
+        Extract URL from the ASGI scope, without also including the querystring.
+        """
         scheme = scope.get("scheme", "http")
         server = scope.get("server", None)
         path = scope.get("root_path", "") + scope["path"]
@@ -62,9 +65,15 @@ class SentryMiddleware:
         return path
 
     def get_query(self, scope):
+        """
+        Extract querystring from the ASGI scope, in the format that the Sentry protocol expects.
+        """
         return urllib.parse.unquote(scope["query_string"].decode("latin-1"))
 
     def get_headers(self, scope):
+        """
+        Extract headers from the ASGI scope, in the format that the Sentry protocol expects.
+        """
         headers = {}
         for raw_key, raw_value in scope["headers"]:
             key = raw_key.decode("latin-1")
@@ -76,6 +85,9 @@ class SentryMiddleware:
         return headers
 
     def get_transaction(self, scope):
+        """
+        Return a transaction string to identify the routed endpoint.
+        """
         endpoint = scope["endpoint"]
         qualname = (
             getattr(endpoint, "__qualname__", None)
