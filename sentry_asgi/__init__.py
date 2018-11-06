@@ -7,7 +7,7 @@ from sentry_sdk.utils import event_from_exception, exc_info_from_error
 from starlette.requests import Request
 
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 
 class SentryMiddleware:
