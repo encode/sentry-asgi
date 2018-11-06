@@ -1,0 +1,9 @@
+sentry-sdk
+
+# Testing
+black
+codecov
+isort
+pytest
+pytest-cov
+starlette
