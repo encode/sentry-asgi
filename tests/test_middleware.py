@@ -14,7 +14,7 @@ from sentry_asgi import SentryMiddleware
 
 @pytest.fixture
 def app():
-    app = Starlette(__name__)
+    app = Starlette()
 
     @app.route("/sync-message")
     def hi(request):
