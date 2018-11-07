@@ -4,6 +4,7 @@ import random
 import pytest
 from sentry_sdk import capture_message
 from starlette.applications import Starlette
+from starlette.lifespan import LifespanContext
 from starlette.responses import PlainTextResponse
 from starlette.testclient import TestClient
 
@@ -15,22 +16,34 @@ def app():
     app = Starlette(__name__)
 
     @app.route("/message")
-    async def hi(request):
+    def hi(request):
         capture_message("hi", level="error")
         return PlainTextResponse("ok")
+
+    @app.on_event("startup")
+    async def setup_executor():
+        try:
+            from sentry_asgi.executor import ContextPreservingExecutor
+        except ImportError:
+            pass
+        else:
+            executor = ContextPreservingExecutor()
+            loop = asyncio.get_event_loop()
+            loop.set_default_executor(executor)
 
     app.add_middleware(SentryMiddleware)
 
     return app
 
 
-# @pytest.mark.xfail
 def test_request_data(sentry_init, app, capture_events):
     sentry_init()
     events = capture_events()
 
-    client = TestClient(app)
-    response = client.get("/message?foo=bar")
+    with LifespanContext(app):
+        client = TestClient(app)
+        response = client.get("/message?foo=bar")
+
     assert response.status_code == 200
 
     event, = events
@@ -64,8 +77,10 @@ def test_errors(sentry_init, app, capture_events):
     def myerror(request):
         raise ValueError("oh no")
 
-    client = TestClient(app, raise_server_exceptions=False)
-    response = client.get("/error")
+    with LifespanContext(app):
+        client = TestClient(app, raise_server_exceptions=False)
+        response = client.get("/error")
+
     assert response.status_code == 500
 
     event, = events
