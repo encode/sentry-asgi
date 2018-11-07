@@ -22,10 +22,13 @@ Usage:
 
 ```python
 from sentry_asgi import SentryMiddleware
+import sentry_sdk
 
+
+sentry_sdk.init(dsn=...)
 
 app = ...
-app = SentryMiddleware(app, sentry_dsn='...')
+app = SentryMiddleware(app)
 ```
 
 ## Known limitations

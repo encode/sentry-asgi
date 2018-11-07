@@ -7,14 +7,12 @@ from sentry_sdk.utils import event_from_exception, exc_info_from_error
 from starlette.requests import Request
 
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 
 class SentryMiddleware:
-    def __init__(self, app, sentry_dsn: str = None):
+    def __init__(self, app):
         self.app = app
-        if sentry_dsn is not None:
-            sentry_sdk.init(sentry_dsn)
 
     def __call__(self, scope):
         return functools.partial(self.asgi, asgi_scope=scope)
