@@ -66,8 +66,6 @@ On 3.6 and below the SentryMiddleware will capture and log application exception
 but will not properly tie in logging, messages, or breadcrumbs for any code that
 runs within a threadpool executor or subtask.
 
-For further context [see here](https://github.com/getsentry/sentry-python/issues/162#issuecomment-436257011).
-
 ASGI frameworks should ensure that any thread pool executors [preserve the `contextvar` context](https://github.com/django/asgiref/issues/71).
 
 ### Endpoint information
