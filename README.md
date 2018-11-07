@@ -31,8 +31,10 @@ app = ...
 app = SentryMiddleware(app)
 ```
 
-## Known limitations
+## Notes
 
 The SentryMiddleware will capture and log application exceptions just fine.
 
 Explicitly logging events using the SDK from within views [does not currently appear to work correctly](https://github.com/getsentry/sentry-python/issues/162#issuecomment-436257011).
+
+It is recommended that frameworks populate an "endpoint" key in the ASGI scope, to indicate which view function or class should be logged by the middleware.
