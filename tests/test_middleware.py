@@ -15,7 +15,7 @@ def app():
     app = Starlette(__name__)
 
     @app.route("/message")
-    def hi(request):
+    async def hi(request):
         capture_message("hi", level="error")
         return PlainTextResponse("ok")
 
@@ -24,7 +24,7 @@ def app():
     return app
 
 
-@pytest.mark.xfail
+# @pytest.mark.xfail
 def test_request_data(sentry_init, app, capture_events):
     sentry_init()
     events = capture_events()
@@ -34,11 +34,12 @@ def test_request_data(sentry_init, app, capture_events):
     assert response.status_code == 200
 
     event, = events
-    assert event["transaction"] == "hi"
-    assert event["request"]["env"] == {"REMOTE_ADDR": ""}
+    assert event["transaction"] == "test_middleware.app.<locals>.hi"
+    assert event["request"]["env"] == {"REMOTE_ADDR": "testclient"}
     assert set(event["request"]["headers"]) == {
         "accept",
         "accept-encoding",
+        "connection",
         "host",
         "user-agent",
     }
