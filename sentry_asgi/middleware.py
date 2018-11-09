@@ -53,7 +53,7 @@ class SentryMiddleware:
             if key == b"host":
                 host_header = value.decode("latin-1")
                 return "%s://%s%s" % (scheme, host_header, path)
-        
+
         if server is not None:
             host, port = server
             default_port = {"http": 80, "https": 443, "ws": 80, "wss": 443}[scheme]
