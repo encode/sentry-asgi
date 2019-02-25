@@ -36,7 +36,6 @@ Here's a more complete example, using Starlette:
 ```python
 import sentry_sdk
 from sentry_asgi import SentryMiddleware
-from sentry_asgi.executor import ContextPreservingExecutor  # Python 3.7+
 
 sentry_sdk.init(dsn=...)
 
@@ -45,12 +44,6 @@ app = Starlette()
 @app.route("/")
 def homepage(request):
     raise ValueError("nope")
-
-@app.on_event("startup")
-async def setup_executor():
-    executor = ContextPreservingExecutor()
-    loop = asyncio.get_event_loop()
-    loop.set_default_executor(executor)
 
 app.add_middleware(SentryMiddleware)
 ```
