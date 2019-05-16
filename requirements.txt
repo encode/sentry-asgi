@@ -6,4 +6,4 @@ codecov
 isort
 pytest
 pytest-cov
-starlette
+starlette==0.12.0b3  # Unpin once 0.12 is released
