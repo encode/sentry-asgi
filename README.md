@@ -1,3 +1,13 @@
+**Update** Sentry now includes built-in support for ASGI. (Based on this implementation.)
+
+Please see the documentation at https://docs.sentry.io/platforms/python/asgi/ 
+
+Or the source code implementation at https://github.com/getsentry/sentry-python/blob/master/sentry_sdk/integrations/asgi.py
+
+As a result, this repository has now been placed in an "archived" state.
+
+---
+
 # sentry-asgi
 
 <a href="https://travis-ci.org/encode/sentry-asgi">
